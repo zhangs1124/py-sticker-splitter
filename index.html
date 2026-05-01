@@ -411,7 +411,7 @@
                     </div>
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 15px;">
                         <label style="color: var(--text-muted); font-size: 0.95rem;">自動去除純白背景</label>
-                        <input type="checkbox" id="remove-bg" style="width: 18px; height: 18px; cursor: pointer;" checked>
+                        <input type="checkbox" id="remove-bg" style="width: 18px; height: 18px; cursor: pointer;">
                     </div>
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 10px;">
                         <label style="color: var(--text-muted); font-size: 0.85rem;" title="數值越大，淺色也會被當成白色去除">去背容差值 (0-255)</label>
@@ -488,7 +488,7 @@
             padLeftInput.value = 0;
             padRightInput.value = 0;
             startIndexInput.value = 1;
-            removeBgInput.checked = true;
+            removeBgInput.checked = false;
             bgToleranceInput.value = 10;
             
             rowOffsetsInput.forEach(r => {
