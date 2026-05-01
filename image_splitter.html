@@ -109,6 +109,12 @@
             display: none;
             margin-top: 30px;
             animation: fadeIn 0.5s ease-out;
+            text-align: left;
+        }
+
+        #controls-section h3 {
+            margin-top: 0;
+            text-align: center;
         }
 
         .controls-grid {
@@ -132,6 +138,7 @@
             font-size: 0.9rem;
             color: var(--text-muted);
             margin-bottom: 8px;
+            text-align: center;
         }
 
         .control-group input {
@@ -262,7 +269,7 @@
         </div>
 
         <div id="controls-section">
-            <h3 style="margin-top: 0;">微調裁切邊界 (位移)</h3>
+            <h3>第一步：整體微調裁切邊界</h3>
             <div class="controls-grid">
                 <div class="control-group">
                     <label>上方位移 (px)</label>
@@ -279,6 +286,26 @@
                 <div class="control-group">
                     <label>右方位移 (px)</label>
                     <input type="number" id="pad-right" value="0" min="0" step="5">
+                </div>
+            </div>
+
+            <h3 style="margin-top: 20px;">第二步：進階單列微調 (Y軸偏移)</h3>
+            <div class="controls-grid">
+                <div class="control-group">
+                    <label>第 1 列偏移</label>
+                    <input type="number" id="row-1-offset" value="0" step="5">
+                </div>
+                <div class="control-group">
+                    <label>第 2 列偏移</label>
+                    <input type="number" id="row-2-offset" value="0" step="5">
+                </div>
+                <div class="control-group">
+                    <label>第 3 列偏移</label>
+                    <input type="number" id="row-3-offset" value="0" step="5">
+                </div>
+                <div class="control-group">
+                    <label>第 4 列偏移</label>
+                    <input type="number" id="row-4-offset" value="0" step="5">
                 </div>
             </div>
         </div>
@@ -305,19 +332,30 @@
         const loader = document.getElementById('loader');
         const btnText = document.getElementById('btn-text');
 
-        // 控制參數
+        // 整體邊界參數
         const padTopInput = document.getElementById('pad-top');
         const padBottomInput = document.getElementById('pad-bottom');
         const padLeftInput = document.getElementById('pad-left');
         const padRightInput = document.getElementById('pad-right');
+
+        // 各列獨立位移參數
+        const row1OffsetInput = document.getElementById('row-1-offset');
+        const row2OffsetInput = document.getElementById('row-2-offset');
+        const row3OffsetInput = document.getElementById('row-3-offset');
+        const row4OffsetInput = document.getElementById('row-4-offset');
+        
+        const allInputs = [
+            padTopInput, padBottomInput, padLeftInput, padRightInput,
+            row1OffsetInput, row2OffsetInput, row3OffsetInput, row4OffsetInput
+        ];
 
         let splitDataUrls = [];
         let currentImg = null; // 儲存目前載入的圖片物件
         const rows = 4;
         const cols = 4;
 
-        // 監聽位移參數變更，即時重新切割
-        [padTopInput, padBottomInput, padLeftInput, padRightInput].forEach(input => {
+        // 監聽所有參數變更，即時重新切割
+        allInputs.forEach(input => {
             input.addEventListener('input', () => {
                 if (currentImg) {
                     processImage();
@@ -407,14 +445,22 @@
             const padLeft = parseInt(padLeftInput.value) || 0;
             const padRight = parseInt(padRightInput.value) || 0;
 
-            // 計算扣除位移後的「有效長寬」
+            // 讀取四個列的獨立位移值
+            const rowOffsets = [
+                parseInt(row1OffsetInput.value) || 0,
+                parseInt(row2OffsetInput.value) || 0,
+                parseInt(row3OffsetInput.value) || 0,
+                parseInt(row4OffsetInput.value) || 0
+            ];
+
+            // 計算扣除邊界位移後的「有效長寬」
             const effectiveWidth = currentImg.width - padLeft - padRight;
             const effectiveHeight = currentImg.height - padTop - padBottom;
 
             // 若扣到變負數則不處理
             if (effectiveWidth <= 0 || effectiveHeight <= 0) return;
 
-            // 以有效長寬來計算每塊的大小
+            // 以有效長寬來計算每塊的大小 (寬高不受各列位移影響)
             const tileW = Math.floor(effectiveWidth / cols);
             const tileH = Math.floor(effectiveHeight / rows);
 
@@ -425,9 +471,9 @@
                     canvas.height = tileH;
                     const ctx = canvas.getContext('2d');
                     
-                    // 根據 padding 與目前行列計算實際的繪製起始座標
+                    // 根據 padding、目前行列、以及該列的專屬位移 計算實際的繪製起始座標
                     const left = padLeft + (c * tileW);
-                    const upper = padTop + (r * tileH);
+                    const upper = padTop + (r * tileH) + rowOffsets[r];
 
                     // 將對應區域繪製到 canvas
                     ctx.drawImage(currentImg, left, upper, tileW, tileH, 0, 0, tileW, tileH);
