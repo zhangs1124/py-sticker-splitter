@@ -597,7 +597,7 @@
 
                     splitDataUrls.push({
                         name: fileName,
-                        data: canvas.toDataURL('image/png').split(',')[1]
+                        data: enforceLineStickerSize(canvas)
                     });
 
                     // 針對第一張圖，自動產生 LINE 所需的 main.png 與 tab.png
@@ -607,6 +607,39 @@
                     }
                 }
             }
+        }
+
+        // 強制符合 LINE 貼圖規範 (最大 370x320，且寬高為偶數)
+        function enforceLineStickerSize(sourceCanvas) {
+            let targetW = sourceCanvas.width;
+            let targetH = sourceCanvas.height;
+            
+            // 1. 若超過 LINE 規定的最大尺寸，則等比例縮小
+            const MAX_W = 370;
+            const MAX_H = 320;
+            if (targetW > MAX_W || targetH > MAX_H) {
+                const scale = Math.min(MAX_W / targetW, MAX_H / targetH);
+                targetW = Math.floor(targetW * scale);
+                targetH = Math.floor(targetH * scale);
+            }
+            
+            // 2. 強制轉為偶數 (LINE 官方強烈建議)
+            if (targetW % 2 !== 0) targetW = Math.max(2, targetW - 1);
+            if (targetH % 2 !== 0) targetH = Math.max(2, targetH - 1);
+            
+            // 3. 如果尺寸無須變動，直接回傳
+            if (targetW === sourceCanvas.width && targetH === sourceCanvas.height) {
+                return sourceCanvas.toDataURL('image/png').split(',')[1];
+            }
+            
+            // 建立新 canvas 繪製符合規範的圖片
+            const canvas = document.createElement('canvas');
+            canvas.width = targetW;
+            canvas.height = targetH;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(sourceCanvas, 0, 0, sourceCanvas.width, sourceCanvas.height, 0, 0, targetW, targetH);
+            
+            return canvas.toDataURL('image/png').split(',')[1];
         }
 
         // 產生維持比例並置中縮放的圖片 (LINE 貼圖需求)
