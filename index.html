@@ -411,7 +411,7 @@
                     </div>
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 15px;">
                         <label style="color: var(--text-muted); font-size: 0.95rem;">自動去除純白背景</label>
-                        <input type="checkbox" id="remove-bg" style="width: 18px; height: 18px; cursor: pointer;">
+                        <input type="checkbox" id="remove-bg" style="width: 18px; height: 18px; cursor: pointer;" checked>
                     </div>
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 10px;">
                         <label style="color: var(--text-muted); font-size: 0.85rem;" title="數值越大，淺色也會被當成白色去除">去背容差值 (0-255)</label>
@@ -429,6 +429,9 @@
                     <button id="download-btn">
                         <div class="loader" id="loader"></div>
                         <span id="btn-text">打包下載 (ZIP)</span>
+                    </button>
+                    <button id="reset-settings" style="background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.1); box-shadow: none; margin-left: 10px;">
+                        重置設定
                     </button>
                 </div>
                 <div class="grid-container" id="grid-container">
@@ -474,6 +477,26 @@
         let allInputs = [padTopInput, padBottomInput, padLeftInput, padRightInput, startIndexInput, removeBgInput, bgToleranceInput];
         rowOffsetsInput.forEach(r => {
             allInputs.push(r.x, r.y);
+        });
+
+        // 重置按鈕邏輯
+        document.getElementById('reset-settings').addEventListener('click', () => {
+            if (!confirm('確定要將所有設定恢復為預設值嗎？')) return;
+            
+            padTopInput.value = 0;
+            padBottomInput.value = 0;
+            padLeftInput.value = 0;
+            padRightInput.value = 0;
+            startIndexInput.value = 1;
+            removeBgInput.checked = true;
+            bgToleranceInput.value = 10;
+            
+            rowOffsetsInput.forEach(r => {
+                r.x.value = 0;
+                r.y.value = 0;
+            });
+            
+            if (currentImg) processImage();
         });
 
         let splitDataUrls = [];
