@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+\uFEFF<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
@@ -104,9 +104,59 @@
             fill: var(--primary);
         }
 
+        /* 控制面板區塊 */
+        #controls-section {
+            display: none;
+            margin-top: 30px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            background: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+            margin-bottom: 20px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .control-group label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .control-group input {
+            width: 80px;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid var(--glass-border);
+            background: rgba(255,255,255,0.1);
+            color: white;
+            text-align: center;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .control-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* 預覽區塊 */
         #preview-section {
             display: none;
-            margin-top: 40px;
+            margin-top: 20px;
             animation: fadeIn 0.5s ease-out;
         }
 
@@ -211,6 +261,28 @@
             </div>
         </div>
 
+        <div id="controls-section">
+            <h3 style="margin-top: 0;">微調裁切邊界 (位移)</h3>
+            <div class="controls-grid">
+                <div class="control-group">
+                    <label>上方位移 (px)</label>
+                    <input type="number" id="pad-top" value="0" min="0" step="5">
+                </div>
+                <div class="control-group">
+                    <label>下方位移 (px)</label>
+                    <input type="number" id="pad-bottom" value="0" min="0" step="5">
+                </div>
+                <div class="control-group">
+                    <label>左方位移 (px)</label>
+                    <input type="number" id="pad-left" value="0" min="0" step="5">
+                </div>
+                <div class="control-group">
+                    <label>右方位移 (px)</label>
+                    <input type="number" id="pad-right" value="0" min="0" step="5">
+                </div>
+            </div>
+        </div>
+
         <div id="preview-section">
             <h3>預覽切割結果</h3>
             <div class="grid-container" id="grid-container">
@@ -226,15 +298,32 @@
     <script>
         const dropZone = document.getElementById('drop-zone');
         const fileInput = document.getElementById('file-input');
+        const controlsSection = document.getElementById('controls-section');
         const previewSection = document.getElementById('preview-section');
         const gridContainer = document.getElementById('grid-container');
         const downloadBtn = document.getElementById('download-btn');
         const loader = document.getElementById('loader');
         const btnText = document.getElementById('btn-text');
 
+        // 控制參數
+        const padTopInput = document.getElementById('pad-top');
+        const padBottomInput = document.getElementById('pad-bottom');
+        const padLeftInput = document.getElementById('pad-left');
+        const padRightInput = document.getElementById('pad-right');
+
         let splitDataUrls = [];
+        let currentImg = null; // 儲存目前載入的圖片物件
         const rows = 4;
         const cols = 4;
+
+        // 監聽位移參數變更，即時重新切割
+        [padTopInput, padBottomInput, padLeftInput, padRightInput].forEach(input => {
+            input.addEventListener('input', () => {
+                if (currentImg) {
+                    processImage();
+                }
+            });
+        });
 
         // 避免預設行為
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -291,20 +380,43 @@
             reader.onload = function(event) {
                 const img = new Image();
                 img.onload = function() {
-                    processImage(img);
+                    currentImg = img;
+                    
+                    // 圖片載入後，顯示控制區塊並執行初次切割
+                    controlsSection.style.display = 'block';
+                    processImage();
+                    
+                    // 滾動到預覽區
+                    controlsSection.scrollIntoView({ behavior: 'smooth' });
                 }
                 img.src = event.target.result;
             }
             reader.readAsDataURL(file);
         }
 
-        // 切割圖片
-        function processImage(img) {
+        // 執行切割
+        function processImage() {
+            if (!currentImg) return;
+            
             gridContainer.innerHTML = '';
             splitDataUrls = [];
             
-            const tileW = Math.floor(img.width / cols);
-            const tileH = Math.floor(img.height / rows);
+            // 讀取四個邊界的裁切值
+            const padTop = parseInt(padTopInput.value) || 0;
+            const padBottom = parseInt(padBottomInput.value) || 0;
+            const padLeft = parseInt(padLeftInput.value) || 0;
+            const padRight = parseInt(padRightInput.value) || 0;
+
+            // 計算扣除位移後的「有效長寬」
+            const effectiveWidth = currentImg.width - padLeft - padRight;
+            const effectiveHeight = currentImg.height - padTop - padBottom;
+
+            // 若扣到變負數則不處理
+            if (effectiveWidth <= 0 || effectiveHeight <= 0) return;
+
+            // 以有效長寬來計算每塊的大小
+            const tileW = Math.floor(effectiveWidth / cols);
+            const tileH = Math.floor(effectiveHeight / rows);
 
             for (let r = 0; r < rows; r++) {
                 for (let c = 0; c < cols; c++) {
@@ -313,11 +425,12 @@
                     canvas.height = tileH;
                     const ctx = canvas.getContext('2d');
                     
-                    const left = c * tileW;
-                    const upper = r * tileH;
+                    // 根據 padding 與目前行列計算實際的繪製起始座標
+                    const left = padLeft + (c * tileW);
+                    const upper = padTop + (r * tileH);
 
                     // 將對應區域繪製到 canvas
-                    ctx.drawImage(img, left, upper, tileW, tileH, 0, 0, tileW, tileH);
+                    ctx.drawImage(currentImg, left, upper, tileW, tileH, 0, 0, tileW, tileH);
                     
                     const gridItem = document.createElement('div');
                     gridItem.className = 'grid-item';
@@ -332,9 +445,6 @@
             }
 
             previewSection.style.display = 'block';
-            
-            // 滾動到預覽區
-            previewSection.scrollIntoView({ behavior: 'smooth' });
         }
 
         // 下載 ZIP
