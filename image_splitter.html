@@ -1,5 +1,6 @@
-\uFEFF<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,62 +19,84 @@
 
         body {
             margin: 0;
-            padding: 0;
+            padding: 20px;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg-color);
-            background-image: 
-                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
-                radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
-                radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+            background-image:
+                radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
+                radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 1) 0, transparent 50%);
             background-attachment: fixed;
             color: var(--text-main);
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
         }
 
-        .container {
-            width: 90%;
-            max-width: 800px;
+        .app-container {
+            width: 100%;
+            max-width: 1400px;
             background: var(--glass-bg);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid var(--glass-border);
             border-radius: 24px;
-            padding: 40px;
+            padding: 30px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            text-align: center;
-            margin: 40px 0;
+            display: flex;
+            gap: 40px;
+        }
+
+        @media (max-width: 1000px) {
+            .app-container {
+                flex-direction: column;
+            }
+        }
+
+        .left-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 350px;
+        }
+
+        .right-panel {
+            flex: 1.5;
+            display: flex;
+            flex-direction: column;
         }
 
         h1 {
             margin-top: 0;
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             background: linear-gradient(135deg, #60a5fa, #c084fc);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
 
         p.subtitle {
             color: var(--text-muted);
-            margin-bottom: 30px;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
         }
 
         .drop-zone {
             border: 2px dashed var(--glass-border);
             border-radius: 16px;
-            padding: 60px 20px;
+            padding: 40px 20px;
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
-            background: rgba(0,0,0,0.2);
+            background: rgba(0, 0, 0, 0.2);
+            text-align: center;
+            margin-bottom: 25px;
         }
 
-        .drop-zone:hover, .drop-zone.dragover {
+        .drop-zone:hover,
+        .drop-zone.dragover {
             border-color: var(--primary);
             background: rgba(59, 130, 246, 0.1);
         }
@@ -93,39 +116,45 @@
         }
 
         .drop-zone svg {
-            width: 64px;
-            height: 64px;
+            width: 48px;
+            height: 48px;
             fill: var(--text-muted);
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             transition: fill 0.3s ease;
         }
 
-        .drop-zone:hover svg, .drop-zone.dragover svg {
+        .drop-zone:hover svg,
+        .drop-zone.dragover svg {
             fill: var(--primary);
         }
 
         /* 控制面板區塊 */
         #controls-section {
             display: none;
-            margin-top: 30px;
             animation: fadeIn 0.5s ease-out;
-            text-align: left;
         }
 
-        #controls-section h3 {
-            margin-top: 0;
-            text-align: center;
-        }
-
-        .controls-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            background: rgba(0,0,0,0.2);
+        .controls-card {
+            background: rgba(0, 0, 0, 0.2);
             padding: 20px;
             border-radius: 16px;
             border: 1px solid var(--glass-border);
             margin-bottom: 20px;
+        }
+
+        .controls-card h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 10px;
+        }
+
+        /* 第一步：四角留白 */
+        .padding-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
         }
 
         .control-group {
@@ -135,56 +164,88 @@
         }
 
         .control-group label {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: var(--text-muted);
-            margin-bottom: 8px;
-            text-align: center;
+            margin-bottom: 6px;
         }
 
-        .control-group input {
-            width: 80px;
-            padding: 8px;
-            border-radius: 8px;
+        input[type="number"] {
+            width: 60px;
+            padding: 6px;
+            border-radius: 6px;
             border: 1px solid var(--glass-border);
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             color: white;
             text-align: center;
             font-family: inherit;
-            font-size: 1rem;
+            font-size: 0.95rem;
             transition: all 0.2s ease;
         }
 
-        .control-group input:focus {
+        input[type="number"]:focus {
             outline: none;
             border-color: var(--primary);
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* 第二步：進階每列微調表單 */
+        .advanced-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .grid-header {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-align: center;
+            padding-bottom: 5px;
+        }
+
+        .row-label {
+            font-size: 0.9rem;
+            text-align: right;
+            padding-right: 10px;
+        }
+
+        .input-cell {
+            display: flex;
+            justify-content: center;
         }
 
         /* 預覽區塊 */
-        #preview-section {
+        #preview-container-wrapper {
             display: none;
-            margin-top: 20px;
+            /* Controlled by JS */
+            flex-direction: column;
+            height: 100%;
             animation: fadeIn 0.5s ease-out;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .preview-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
         }
 
         .grid-container {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-bottom: 30px;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
+            gap: 8px;
+            max-width: 650px;
+            margin: 0 auto;
+            flex-grow: 1;
         }
 
         .grid-item {
             width: 100%;
-            aspect-ratio: 1 / 1;
             background-color: rgba(0,0,0,0.3);
             border-radius: 8px;
             overflow: hidden;
@@ -196,22 +257,22 @@
         }
         
         .grid-item:hover {
-            transform: scale(1.05);
+            transform: scale(1.02);
             border-color: var(--primary);
         }
 
         .grid-item canvas {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
+            height: auto;
+            display: block;
         }
 
         button {
             background: var(--primary);
             color: white;
             border: none;
-            padding: 12px 32px;
-            font-size: 1.1rem;
+            padding: 10px 24px;
+            font-size: 1rem;
             font-weight: 600;
             border-radius: 9999px;
             cursor: pointer;
@@ -237,96 +298,145 @@
 
         .loader {
             display: none;
-            border: 3px solid rgba(255,255,255,0.1);
+            border: 3px solid rgba(255, 255, 255, 0.1);
             border-radius: 50%;
             border-top: 3px solid white;
-            width: 20px;
-            height: 20px;
+            width: 16px;
+            height: 16px;
             animation: spin 1s linear infinite;
-            margin-right: 10px;
+            margin-right: 8px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+            0% {
+                transform: rotate(0deg);
+            }
 
+            100% {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
+
 <body>
 
-    <div class="container">
-        <h1>圖片 4x4 切割工具</h1>
-        <p class="subtitle">將圖片拖放至下方區域，或是點擊選擇檔案</p>
+    <div class="app-container">
 
-        <div class="drop-zone" id="drop-zone">
-            <input type="file" id="file-input" accept="image/*">
-            <div class="drop-zone-content">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
-                <h3>拖放圖片至此</h3>
-                <p>或點擊選擇檔案</p>
+        <!-- 左側：上傳與控制面板 -->
+        <div class="left-panel">
+            <h1>圖片 4x4 切割工具</h1>
+            <p class="subtitle">放入貼圖，一鍵微調與打包</p>
+
+            <div class="drop-zone" id="drop-zone">
+                <input type="file" id="file-input" accept="image/*">
+                <div class="drop-zone-content">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path
+                            d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z" />
+                    </svg>
+                    <h3>拖放圖片至此</h3>
+                    <p style="margin: 5px 0 0 0; font-size: 0.9rem;">或點擊選擇檔案</p>
+                </div>
+            </div>
+
+            <div id="controls-section">
+                <!-- 第一步：整體留白 -->
+                <div class="controls-card">
+                    <h3>第一步：外框留白 (整體偏移)</h3>
+                    <div class="padding-grid">
+                        <div class="control-group">
+                            <label>上 (px)</label>
+                            <input type="number" id="pad-top" value="0" min="0" step="5">
+                        </div>
+                        <div class="control-group">
+                            <label>下 (px)</label>
+                            <input type="number" id="pad-bottom" value="0" min="0" step="5">
+                        </div>
+                        <div class="control-group">
+                            <label>左 (px)</label>
+                            <input type="number" id="pad-left" value="0" min="0" step="5">
+                        </div>
+                        <div class="control-group">
+                            <label>右 (px)</label>
+                            <input type="number" id="pad-right" value="0" min="0" step="5">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 第二步：進階列微調 -->
+                <div class="controls-card">
+                    <h3>第二步：單列微調 (X/Y 軸偏移)</h3>
+                    <div class="advanced-grid">
+                        <div></div>
+                        <div class="grid-header">X 軸 (左右)</div>
+                        <div class="grid-header">Y 軸 (上下)</div>
+
+                        <div class="row-label">第 1 列</div>
+                        <div class="input-cell"><input type="number" id="row-1-offset-x" value="0" step="5"></div>
+                        <div class="input-cell"><input type="number" id="row-1-offset-y" value="0" step="5"></div>
+
+                        <div class="row-label">第 2 列</div>
+                        <div class="input-cell"><input type="number" id="row-2-offset-x" value="0" step="5"></div>
+                        <div class="input-cell"><input type="number" id="row-2-offset-y" value="0" step="5"></div>
+
+                        <div class="row-label">第 3 列</div>
+                        <div class="input-cell"><input type="number" id="row-3-offset-x" value="0" step="5"></div>
+                        <div class="input-cell"><input type="number" id="row-3-offset-y" value="0" step="5"></div>
+
+                        <div class="row-label">第 4 列</div>
+                        <div class="input-cell"><input type="number" id="row-4-offset-x" value="0" step="5"></div>
+                        <div class="input-cell"><input type="number" id="row-4-offset-y" value="0" step="5"></div>
+                    </div>
+                </div>
+
+                <!-- 第三步：輸出設定 -->
+                <div class="controls-card">
+                    <h3>第三步：輸出設定</h3>
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <label style="color: var(--text-muted); font-size: 0.95rem;">啟始編號 (例: 01, 13)</label>
+                        <input type="number" id="start-index" value="1" min="1" step="1" style="width: 80px;">
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div id="controls-section">
-            <h3>第一步：整體微調裁切邊界</h3>
-            <div class="controls-grid">
-                <div class="control-group">
-                    <label>上方位移 (px)</label>
-                    <input type="number" id="pad-top" value="0" min="0" step="5">
+        <!-- 右側：預覽與下載 -->
+        <div class="right-panel">
+            <div id="preview-container-wrapper">
+                <div class="preview-header">
+                    <h3>即時預覽切割結果</h3>
+                    <button id="download-btn">
+                        <div class="loader" id="loader"></div>
+                        <span id="btn-text">打包下載 (ZIP)</span>
+                    </button>
                 </div>
-                <div class="control-group">
-                    <label>下方位移 (px)</label>
-                    <input type="number" id="pad-bottom" value="0" min="0" step="5">
-                </div>
-                <div class="control-group">
-                    <label>左方位移 (px)</label>
-                    <input type="number" id="pad-left" value="0" min="0" step="5">
-                </div>
-                <div class="control-group">
-                    <label>右方位移 (px)</label>
-                    <input type="number" id="pad-right" value="0" min="0" step="5">
-                </div>
-            </div>
-
-            <h3 style="margin-top: 20px;">第二步：進階單列微調 (Y軸偏移)</h3>
-            <div class="controls-grid">
-                <div class="control-group">
-                    <label>第 1 列偏移</label>
-                    <input type="number" id="row-1-offset" value="0" step="5">
-                </div>
-                <div class="control-group">
-                    <label>第 2 列偏移</label>
-                    <input type="number" id="row-2-offset" value="0" step="5">
-                </div>
-                <div class="control-group">
-                    <label>第 3 列偏移</label>
-                    <input type="number" id="row-3-offset" value="0" step="5">
-                </div>
-                <div class="control-group">
-                    <label>第 4 列偏移</label>
-                    <input type="number" id="row-4-offset" value="0" step="5">
+                <div class="grid-container" id="grid-container">
+                    <!-- Canvases will be injected here -->
                 </div>
             </div>
         </div>
 
-        <div id="preview-section">
-            <h3>預覽切割結果</h3>
-            <div class="grid-container" id="grid-container">
-                <!-- Canvases will be injected here -->
-            </div>
-            <button id="download-btn">
-                <div class="loader" id="loader"></div>
-                <span id="btn-text">打包下載 (ZIP)</span>
-            </button>
-        </div>
     </div>
 
     <script>
+        // DOM 元素
         const dropZone = document.getElementById('drop-zone');
         const fileInput = document.getElementById('file-input');
         const controlsSection = document.getElementById('controls-section');
-        const previewSection = document.getElementById('preview-section');
+        const previewWrapper = document.getElementById('preview-container-wrapper');
         const gridContainer = document.getElementById('grid-container');
         const downloadBtn = document.getElementById('download-btn');
         const loader = document.getElementById('loader');
@@ -338,23 +448,28 @@
         const padLeftInput = document.getElementById('pad-left');
         const padRightInput = document.getElementById('pad-right');
 
-        // 各列獨立位移參數
-        const row1OffsetInput = document.getElementById('row-1-offset');
-        const row2OffsetInput = document.getElementById('row-2-offset');
-        const row3OffsetInput = document.getElementById('row-3-offset');
-        const row4OffsetInput = document.getElementById('row-4-offset');
-        
-        const allInputs = [
-            padTopInput, padBottomInput, padLeftInput, padRightInput,
-            row1OffsetInput, row2OffsetInput, row3OffsetInput, row4OffsetInput
+        // 啟始編號參數
+        const startIndexInput = document.getElementById('start-index');
+
+        // 各列獨立 X/Y 位移參數
+        const rowOffsetsInput = [
+            { x: document.getElementById('row-1-offset-x'), y: document.getElementById('row-1-offset-y') },
+            { x: document.getElementById('row-2-offset-x'), y: document.getElementById('row-2-offset-y') },
+            { x: document.getElementById('row-3-offset-x'), y: document.getElementById('row-3-offset-y') },
+            { x: document.getElementById('row-4-offset-x'), y: document.getElementById('row-4-offset-y') }
         ];
 
+        let allInputs = [padTopInput, padBottomInput, padLeftInput, padRightInput, startIndexInput];
+        rowOffsetsInput.forEach(r => {
+            allInputs.push(r.x, r.y);
+        });
+
         let splitDataUrls = [];
-        let currentImg = null; // 儲存目前載入的圖片物件
+        let currentImg = null;
         const rows = 4;
         const cols = 4;
 
-        // 監聽所有參數變更，即時重新切割
+        // 監聽所有參數變更
         allInputs.forEach(input => {
             input.addEventListener('input', () => {
                 if (currentImg) {
@@ -373,59 +488,41 @@
             e.stopPropagation();
         }
 
-        // 拖曳視覺回饋
+        // 拖曳回饋
         ['dragenter', 'dragover'].forEach(eventName => {
             dropZone.addEventListener(eventName, highlight, false);
         });
-
         ['dragleave', 'drop'].forEach(eventName => {
             dropZone.addEventListener(eventName, unhighlight, false);
         });
 
-        function highlight(e) {
-            dropZone.classList.add('dragover');
-        }
+        function highlight(e) { dropZone.classList.add('dragover'); }
+        function unhighlight(e) { dropZone.classList.remove('dragover'); }
 
-        function unhighlight(e) {
-            dropZone.classList.remove('dragover');
-        }
-
-        // 處理檔案放置與選擇
+        // 檔案處理
         dropZone.addEventListener('drop', handleDrop, false);
         fileInput.addEventListener('change', handleFileSelect, false);
 
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            handleFiles(files);
-        }
-
-        function handleFileSelect(e) {
-            const files = e.target.files;
-            handleFiles(files);
-        }
+        function handleDrop(e) { handleFiles(e.dataTransfer.files); }
+        function handleFileSelect(e) { handleFiles(e.target.files); }
 
         function handleFiles(files) {
             if (files.length === 0) return;
             const file = files[0];
-            
+
             if (!file.type.match('image.*')) {
                 alert('請上傳圖片檔案！');
                 return;
             }
 
             const reader = new FileReader();
-            reader.onload = function(event) {
+            reader.onload = function (event) {
                 const img = new Image();
-                img.onload = function() {
+                img.onload = function () {
                     currentImg = img;
-                    
-                    // 圖片載入後，顯示控制區塊並執行初次切割
                     controlsSection.style.display = 'block';
+                    previewWrapper.style.display = 'flex';
                     processImage();
-                    
-                    // 滾動到預覽區
-                    controlsSection.scrollIntoView({ behavior: 'smooth' });
                 }
                 img.src = event.target.result;
             }
@@ -435,62 +532,81 @@
         // 執行切割
         function processImage() {
             if (!currentImg) return;
-            
+
             gridContainer.innerHTML = '';
             splitDataUrls = [];
-            
-            // 讀取四個邊界的裁切值
+
             const padTop = parseInt(padTopInput.value) || 0;
             const padBottom = parseInt(padBottomInput.value) || 0;
             const padLeft = parseInt(padLeftInput.value) || 0;
             const padRight = parseInt(padRightInput.value) || 0;
 
-            // 讀取四個列的獨立位移值
-            const rowOffsets = [
-                parseInt(row1OffsetInput.value) || 0,
-                parseInt(row2OffsetInput.value) || 0,
-                parseInt(row3OffsetInput.value) || 0,
-                parseInt(row4OffsetInput.value) || 0
-            ];
-
-            // 計算扣除邊界位移後的「有效長寬」
             const effectiveWidth = currentImg.width - padLeft - padRight;
             const effectiveHeight = currentImg.height - padTop - padBottom;
 
-            // 若扣到變負數則不處理
             if (effectiveWidth <= 0 || effectiveHeight <= 0) return;
 
-            // 以有效長寬來計算每塊的大小 (寬高不受各列位移影響)
             const tileW = Math.floor(effectiveWidth / cols);
             const tileH = Math.floor(effectiveHeight / rows);
 
+            const startIndex = parseInt(startIndexInput.value) || 1;
+            let currentIndex = startIndex;
+
             for (let r = 0; r < rows; r++) {
+                // 取得該列獨立的 X 和 Y 偏移量
+                const offsetX = parseInt(rowOffsetsInput[r].x.value) || 0;
+                const offsetY = parseInt(rowOffsetsInput[r].y.value) || 0;
+
                 for (let c = 0; c < cols; c++) {
                     const canvas = document.createElement('canvas');
                     canvas.width = tileW;
                     canvas.height = tileH;
                     const ctx = canvas.getContext('2d');
-                    
-                    // 根據 padding、目前行列、以及該列的專屬位移 計算實際的繪製起始座標
-                    const left = padLeft + (c * tileW);
-                    const upper = padTop + (r * tileH) + rowOffsets[r];
 
-                    // 將對應區域繪製到 canvas
+                    // X 軸座標: 全局左留白 + 第 c 行的寬度 + 該列獨立的 X 偏移
+                    const left = padLeft + (c * tileW) + offsetX;
+                    // Y 軸座標: 全局上留白 + 第 r 行的高度 + 該列獨立的 Y 偏移
+                    const upper = padTop + (r * tileH) + offsetY;
+
                     ctx.drawImage(currentImg, left, upper, tileW, tileH, 0, 0, tileW, tileH);
-                    
+
                     const gridItem = document.createElement('div');
                     gridItem.className = 'grid-item';
                     gridItem.appendChild(canvas);
                     gridContainer.appendChild(gridItem);
 
+                    const fileName = `${String(currentIndex).padStart(2, '0')}.png`;
+                    currentIndex++;
+
                     splitDataUrls.push({
-                        name: `tile_${r+1}_${c+1}.png`,
-                        data: canvas.toDataURL('image/png').split(',')[1] // 移除 base64 標頭
+                        name: fileName,
+                        data: canvas.toDataURL('image/png').split(',')[1]
                     });
+
+                    // 針對第一張圖，自動產生 LINE 所需的 main.png 與 tab.png
+                    if (r === 0 && c === 0) {
+                        splitDataUrls.push({ name: 'main.png', data: createResizedImage(canvas, 240, 240) });
+                        splitDataUrls.push({ name: 'tab.png', data: createResizedImage(canvas, 96, 74) });
+                    }
                 }
             }
+        }
 
-            previewSection.style.display = 'block';
+        // 產生維持比例並置中縮放的圖片 (LINE 貼圖需求)
+        function createResizedImage(sourceCanvas, targetW, targetH) {
+            const canvas = document.createElement('canvas');
+            canvas.width = targetW;
+            canvas.height = targetH;
+            const ctx = canvas.getContext('2d');
+            
+            const scale = Math.min(targetW / sourceCanvas.width, targetH / sourceCanvas.height);
+            const w = sourceCanvas.width * scale;
+            const h = sourceCanvas.height * scale;
+            const x = (targetW - w) / 2;
+            const y = (targetH - h) / 2;
+            
+            ctx.drawImage(sourceCanvas, x, y, w, h);
+            return canvas.toDataURL('image/png').split(',')[1];
         }
 
         // 下載 ZIP
@@ -499,19 +615,17 @@
 
             downloadBtn.disabled = true;
             loader.style.display = 'inline-block';
-            btnText.textContent = '正在打包...';
+            btnText.textContent = '打包中...';
 
             try {
                 const zip = new JSZip();
-                
-                // 加入所有圖片到 ZIP
+
                 splitDataUrls.forEach(item => {
-                    zip.file(item.name, item.data, {base64: true});
+                    zip.file(item.name, item.data, { base64: true });
                 });
 
-                const content = await zip.generateAsync({type: "blob"});
-                
-                // 建立下載連結並觸發
+                const content = await zip.generateAsync({ type: "blob" });
+
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(content);
                 link.download = 'split_images.zip';
@@ -529,4 +643,5 @@
         });
     </script>
 </body>
+
 </html>
