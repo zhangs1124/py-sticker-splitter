@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 
 <head>
@@ -16,6 +16,7 @@
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --accent: #ec4899;
+            --highlight: #38bdf8;
         }
 
         body {
@@ -37,7 +38,7 @@
 
         .app-container {
             width: 100%;
-            max-width: 1400px;
+            max-width: 1440px;
             background: var(--glass-bg);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
@@ -46,10 +47,11 @@
             padding: 30px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             display: flex;
-            gap: 40px;
+            gap: 35px;
+            position: relative;
         }
 
-        @media (max-width: 1000px) {
+        @media (max-width: 1050px) {
             .app-container {
                 flex-direction: column;
             }
@@ -59,13 +61,14 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            min-width: 350px;
+            min-width: 340px;
         }
 
         .right-panel {
             flex: 1.5;
             display: flex;
             flex-direction: column;
+            position: relative;
         }
 
         h1 {
@@ -222,6 +225,7 @@
             flex-direction: column;
             height: 100%;
             animation: fadeIn 0.5s ease-out;
+            position: relative;
         }
 
         .preview-header {
@@ -245,10 +249,11 @@
         .grid-container {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
+            gap: 10px;
             max-width: 650px;
             margin: 0 auto;
             flex-grow: 1;
+            position: relative;
         }
 
         .grid-item {
@@ -259,21 +264,28 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 1px solid var(--glass-border);
-            transition: all 0.2s ease;
+            border: 2px solid var(--glass-border);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
             position: relative;
             cursor: pointer;
+            user-select: none;
         }
         
         .grid-item:hover {
-            transform: scale(1.02);
-            border-color: var(--primary);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            border-color: rgba(59, 130, 246, 0.6);
         }
 
+        /* 單格有設定位移 */
         .grid-item.has-offset {
             border-color: var(--accent);
-            box-shadow: 0 0 8px rgba(236, 72, 153, 0.4);
+        }
+
+        /* 單格被選取中 (編輯焦點) */
+        .grid-item.is-selected {
+            border-color: var(--highlight) !important;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.4), 0 8px 20px rgba(0, 0, 0, 0.5) !important;
+            transform: scale(1.02);
+            z-index: 10;
         }
 
         .grid-item canvas {
@@ -282,64 +294,154 @@
             display: block;
         }
 
-        /* 單格右上角微調小標籤與按鈕 */
         .cell-badge {
             position: absolute;
             top: 4px;
             left: 4px;
-            background: rgba(15, 23, 42, 0.75);
+            background: rgba(15, 23, 42, 0.85);
             backdrop-filter: blur(4px);
             font-size: 0.68rem;
             color: #cbd5e1;
-            padding: 1px 5px;
+            padding: 2px 6px;
             border-radius: 4px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             pointer-events: none;
+            font-weight: 600;
         }
 
-        .cell-adjust-btn {
-            position: absolute;
-            top: 4px;
-            right: 4px;
-            background: rgba(15, 23, 42, 0.85);
-            border: 1px solid var(--glass-border);
-            color: #94a3b8;
-            width: 22px;
-            height: 22px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.7rem;
-            padding: 0;
-            box-shadow: none;
-            transition: all 0.2s ease;
-        }
-
-        .cell-adjust-btn:hover {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-            transform: scale(1.1);
-        }
-
-        .grid-item.has-offset .cell-adjust-btn {
-            background: var(--accent);
-            color: white;
-            border-color: var(--accent);
+        .grid-item.is-selected .cell-badge {
+            background: var(--highlight);
+            color: #0f172a;
         }
 
         .offset-tag {
             position: absolute;
             bottom: 4px;
             right: 4px;
-            background: rgba(236, 72, 153, 0.85);
+            background: rgba(236, 72, 153, 0.9);
             color: white;
             font-size: 0.65rem;
-            padding: 1px 4px;
+            padding: 2px 5px;
             border-radius: 4px;
             pointer-events: none;
-            font-weight: 500;
+            font-weight: 600;
+        }
+
+        /* 浮動微調卡 (Floating Popover - 不擋住視線) */
+        .floating-editor-card {
+            display: none;
+            margin-top: 15px;
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--highlight);
+            border-radius: 16px;
+            padding: 16px 20px;
+            box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.6), 0 0 15px rgba(56, 189, 248, 0.2);
+            animation: fadeIn 0.25s ease-out;
+        }
+
+        .floating-editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .floating-editor-header h4 {
+            margin: 0;
+            font-size: 1rem;
+            color: var(--highlight);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .floating-editor-body {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .nudge-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* 十字方向鍵控制器 */
+        .d-pad-container {
+            display: grid;
+            grid-template-columns: repeat(3, 32px);
+            grid-template-rows: repeat(3, 32px);
+            gap: 4px;
+            align-items: center;
+            justify-items: center;
+        }
+
+        .d-pad-btn {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            cursor: pointer;
+            box-shadow: none;
+            transition: all 0.15s ease;
+        }
+
+        .d-pad-btn:hover {
+            background: var(--primary);
+            transform: none;
+            box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+        }
+
+        .d-pad-btn:active {
+            background: var(--primary-hover);
+            transform: scale(0.92);
+        }
+
+        .input-fields-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .field-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .field-item label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .keyboard-hint {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .kbd-badge {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 1px 6px;
+            border-radius: 4px;
+            color: #f1f5f9;
+            font-size: 0.75rem;
+            font-family: monospace;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         button {
@@ -382,106 +484,10 @@
             margin-right: 8px;
         }
 
-        /* 單格微調 Modal 彈窗 */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(8px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 999;
-            animation: fadeIn 0.2s ease-out;
-        }
-
-        .modal-card {
-            background: #1e293b;
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 24px;
-            width: 90%;
-            max-width: 380px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--glass-border);
-            padding-bottom: 10px;
-        }
-
-        .modal-header h4 {
-            margin: 0;
-            font-size: 1.1rem;
-            color: var(--text-main);
-        }
-
-        .modal-close {
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            font-size: 1.2rem;
-            cursor: pointer;
-            padding: 0 4px;
-            box-shadow: none;
-        }
-
-        .modal-close:hover {
-            color: white;
-            background: transparent;
-            transform: none;
-        }
-
-        .modal-body {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        .modal-input-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-input-row label {
-            font-size: 0.95rem;
-            color: var(--text-muted);
-        }
-
-        .modal-actions {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
-            gap: 10px;
-        }
-
-        .modal-btn-reset {
-            background: rgba(255, 255, 255, 0.08);
-            color: #cbd5e1;
-            box-shadow: none;
-            padding: 8px 16px;
-            font-size: 0.9rem;
-        }
-
-        .modal-btn-done {
-            padding: 8px 20px;
-            font-size: 0.9rem;
-        }
-
         @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateY(8px);
             }
 
             to {
@@ -509,7 +515,7 @@
         <!-- 左側：上傳與控制面板 -->
         <div class="left-panel">
             <h1>圖片 4x4 切割工具</h1>
-            <p class="subtitle">放入貼圖，一鍵微調與打包（支援單列與單格獨立微調）</p>
+            <p class="subtitle">放入貼圖，一鍵微調與打包（支援單列與單格即時微調）</p>
 
             <div class="drop-zone" id="drop-zone">
                 <input type="file" id="file-input" accept="image/*">
@@ -598,7 +604,7 @@
                 <div class="preview-header">
                     <div>
                         <h3>即時預覽切割結果</h3>
-                        <p style="margin: 3px 0 0 0; font-size: 0.8rem; color: var(--text-muted);">💡 點擊任一格子可針對「單格」獨立微調 X/Y 軸</p>
+                        <p style="margin: 3px 0 0 0; font-size: 0.8rem; color: var(--text-muted);">💡 點選任一格子，即可直接以鍵盤方向鍵或下方微調器即時移動</p>
                     </div>
                     <div class="preview-header-actions">
                         <button id="download-btn">
@@ -610,39 +616,64 @@
                         </button>
                     </div>
                 </div>
+
+                <!-- 16格網格即時預覽 -->
                 <div class="grid-container" id="grid-container">
                     <!-- Canvases will be injected here -->
                 </div>
+
+                <!-- 單格即時微調浮動卡 (非阻塞視線) -->
+                <div class="floating-editor-card" id="floating-editor">
+                    <div class="floating-editor-header">
+                        <h4 id="editor-title">🎯 正微調：01.png (第 1 列 第 1 欄)</h4>
+                        <div style="display: flex; gap: 8px;">
+                            <button id="editor-reset-btn" style="background: rgba(255,255,255,0.1); color: #cbd5e1; box-shadow: none; padding: 4px 12px; font-size: 0.8rem;">重置此格</button>
+                            <button id="editor-close-btn" style="background: transparent; color: var(--text-muted); box-shadow: none; padding: 4px 8px; font-size: 1.1rem; line-height: 1;">&times;</button>
+                        </div>
+                    </div>
+                    <div class="floating-editor-body">
+                        <div class="nudge-controls">
+                            <!-- 十字鍵微調按鈕 -->
+                            <div class="d-pad-container">
+                                <div></div>
+                                <button class="d-pad-btn" id="dpad-up" title="向上微調 1px (Shift+點擊為 5px)">▲</button>
+                                <div></div>
+                                <button class="d-pad-btn" id="dpad-left" title="向左微調 1px (Shift+點擊為 5px)">◀</button>
+                                <button class="d-pad-btn" id="dpad-center" title="歸零此格" style="font-size: 0.7rem;">●</button>
+                                <button class="d-pad-btn" id="dpad-right" title="向右微調 1px (Shift+點擊為 5px)">▶</button>
+                                <div></div>
+                                <button class="d-pad-btn" id="dpad-down" title="向下微調 1px (Shift+點擊為 5px)">▼</button>
+                                <div></div>
+                            </div>
+
+                            <!-- 數值手動輸入 -->
+                            <div class="input-fields-group">
+                                <div class="field-item">
+                                    <label>X (左右)</label>
+                                    <input type="number" id="cell-offset-x" value="0" step="1">
+                                </div>
+                                <div class="field-item">
+                                    <label>Y (上下)</label>
+                                    <input type="number" id="cell-offset-y" value="0" step="1">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 鍵盤快捷提示 -->
+                        <div class="keyboard-hint">
+                            <span>⌨️ 快捷鍵：</span>
+                            <span class="kbd-badge">↑</span>
+                            <span class="kbd-badge">↓</span>
+                            <span class="kbd-badge">←</span>
+                            <span class="kbd-badge">→</span>
+                            <span style="font-size: 0.75rem;">直接微調 1px (按住 Shift 為 5px)</span>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
 
-    </div>
-
-    <!-- 單格微調 Modal 彈窗 -->
-    <div class="modal-overlay" id="cell-modal">
-        <div class="modal-card">
-            <div class="modal-header">
-                <h4 id="modal-title">微調單格</h4>
-                <button class="modal-close" id="modal-close-btn">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="modal-input-row">
-                    <label for="cell-offset-x">X 軸偏移 (左右 px)</label>
-                    <input type="number" id="cell-offset-x" value="0" step="1">
-                </div>
-                <div class="modal-input-row">
-                    <label for="cell-offset-y">Y 軸偏移 (上下 px)</label>
-                    <input type="number" id="cell-offset-y" value="0" step="1">
-                </div>
-                <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">
-                    說明：此數值會與「整體留白」及「該列偏移」疊加計算，並實際套用於切割與下載的圖檔。
-                </div>
-            </div>
-            <div class="modal-actions">
-                <button class="modal-btn-reset" id="cell-reset-btn">重置此格</button>
-                <button class="modal-btn-done" id="cell-save-btn">完成</button>
-            </div>
-        </div>
     </div>
 
     <script>
@@ -669,16 +700,20 @@
         const removeBgInput = document.getElementById('remove-bg');
         const bgToleranceInput = document.getElementById('bg-tolerance');
 
-        // 單格微調 Modal 元素
-        const cellModal = document.getElementById('cell-modal');
-        const modalTitle = document.getElementById('modal-title');
-        const modalCloseBtn = document.getElementById('modal-close-btn');
+        // 浮動微調卡元素
+        const floatingEditor = document.getElementById('floating-editor');
+        const editorTitle = document.getElementById('editor-title');
+        const editorCloseBtn = document.getElementById('editor-close-btn');
+        const editorResetBtn = document.getElementById('editor-reset-btn');
         const cellOffsetXInput = document.getElementById('cell-offset-x');
         const cellOffsetYInput = document.getElementById('cell-offset-y');
-        const cellResetBtn = document.getElementById('cell-reset-btn');
-        const cellSaveBtn = document.getElementById('cell-save-btn');
+        const dpadUp = document.getElementById('dpad-up');
+        const dpadDown = document.getElementById('dpad-down');
+        const dpadLeft = document.getElementById('dpad-left');
+        const dpadRight = document.getElementById('dpad-right');
+        const dpadCenter = document.getElementById('dpad-center');
 
-        let activeCell = { r: 0, c: 0 };
+        let selectedCell = null; // { r, c, fileName }
 
         // 各列獨立 X/Y 位移參數
         const rowOffsetsInput = [
@@ -723,14 +758,15 @@
                     cellOffsets[r][c] = { x: 0, y: 0 };
                 }
             }
-            
+
+            deselectCell();
             if (currentImg) processImage();
         });
 
         let splitDataUrls = [];
         let currentImg = null;
 
-        // 監聽所有參數變更
+        // 監聽全局參數變更
         allInputs.forEach(input => {
             input.addEventListener('input', () => {
                 if (currentImg) {
@@ -739,51 +775,126 @@
             });
         });
 
-        // Modal 相關事件
-        function openCellModal(r, c, fileName) {
-            activeCell = { r, c };
-            modalTitle.textContent = `微調單格：${fileName} (第 ${r + 1} 列 第 ${c + 1} 欄)`;
+        // 選中某一格進行微調
+        function selectCell(r, c, fileName) {
+            selectedCell = { r, c, fileName };
+            editorTitle.textContent = `🎯 正微調：${fileName} (第 ${r + 1} 列 第 ${c + 1} 欄)`;
             cellOffsetXInput.value = cellOffsets[r][c].x;
             cellOffsetYInput.value = cellOffsets[r][c].y;
-            cellModal.style.display = 'flex';
-            cellOffsetXInput.focus();
-            cellOffsetXInput.select();
+            floatingEditor.style.display = 'block';
+            
+            // 更新畫面上高亮格子
+            updateCellHighlight();
         }
 
-        function closeCellModal() {
-            cellModal.style.display = 'none';
+        // 取消選取
+        function deselectCell() {
+            selectedCell = null;
+            floatingEditor.style.display = 'none';
+            updateCellHighlight();
         }
 
-        modalCloseBtn.addEventListener('click', closeCellModal);
-        cellSaveBtn.addEventListener('click', () => {
-            closeCellModal();
-        });
-
-        cellModal.addEventListener('click', (e) => {
-            if (e.target === cellModal) closeCellModal();
-        });
-
-        // 監聽 Modal 輸入框變更
-        [cellOffsetXInput, cellOffsetYInput].forEach(input => {
-            input.addEventListener('input', () => {
-                const r = activeCell.r;
-                const c = activeCell.c;
-                cellOffsets[r][c].x = parseInt(cellOffsetXInput.value) || 0;
-                cellOffsets[r][c].y = parseInt(cellOffsetYInput.value) || 0;
-                if (currentImg) processImage();
+        function updateCellHighlight() {
+            const allItems = gridContainer.querySelectorAll('.grid-item');
+            allItems.forEach(item => {
+                const r = parseInt(item.dataset.row);
+                const c = parseInt(item.dataset.col);
+                if (selectedCell && selectedCell.r === r && selectedCell.c === c) {
+                    item.classList.add('is-selected');
+                } else {
+                    item.classList.remove('is-selected');
+                }
             });
-        });
+        }
 
-        cellResetBtn.addEventListener('click', () => {
-            const r = activeCell.r;
-            const c = activeCell.c;
+        editorCloseBtn.addEventListener('click', deselectCell);
+
+        // 微調數值變更輔助函式
+        function nudgeActiveCell(dx, dy) {
+            if (!selectedCell) return;
+            const r = selectedCell.r;
+            const c = selectedCell.c;
+            cellOffsets[r][c].x += dx;
+            cellOffsets[r][c].y += dy;
+            cellOffsetXInput.value = cellOffsets[r][c].x;
+            cellOffsetYInput.value = cellOffsets[r][c].y;
+            if (currentImg) processImage();
+        }
+
+        // D-Pad 按鈕事件
+        dpadUp.addEventListener('click', (e) => nudgeActiveCell(0, e.shiftKey ? -5 : -1));
+        dpadDown.addEventListener('click', (e) => nudgeActiveCell(0, e.shiftKey ? 5 : 1));
+        dpadLeft.addEventListener('click', (e) => nudgeActiveCell(e.shiftKey ? -5 : -1, 0));
+        dpadRight.addEventListener('click', (e) => nudgeActiveCell(e.shiftKey ? 5 : 1, 0));
+        dpadCenter.addEventListener('click', () => {
+            if (!selectedCell) return;
+            const r = selectedCell.r;
+            const c = selectedCell.c;
             cellOffsets[r][c] = { x: 0, y: 0 };
             cellOffsetXInput.value = 0;
             cellOffsetYInput.value = 0;
             if (currentImg) processImage();
         });
 
-        // 避免預設行為
+        // 監聽微調輸入框手動輸入
+        [cellOffsetXInput, cellOffsetYInput].forEach(input => {
+            input.addEventListener('input', () => {
+                if (!selectedCell) return;
+                const r = selectedCell.r;
+                const c = selectedCell.c;
+                cellOffsets[r][c].x = parseInt(cellOffsetXInput.value) || 0;
+                cellOffsets[r][c].y = parseInt(cellOffsetYInput.value) || 0;
+                if (currentImg) processImage();
+            });
+        });
+
+        editorResetBtn.addEventListener('click', () => {
+            if (!selectedCell) return;
+            const r = selectedCell.r;
+            const c = selectedCell.c;
+            cellOffsets[r][c] = { x: 0, y: 0 };
+            cellOffsetXInput.value = 0;
+            cellOffsetYInput.value = 0;
+            if (currentImg) processImage();
+        });
+
+        // 全域鍵盤方向鍵監聽（選中格子時，按方向鍵直接微調）
+        window.addEventListener('keydown', (e) => {
+            if (!selectedCell) return;
+
+            // 若使用者正在輸入其他 input 框，不攔截
+            if (['input', 'textarea'].includes(document.activeElement.tagName.toLowerCase())) {
+                if (document.activeElement !== cellOffsetXInput && document.activeElement !== cellOffsetYInput) {
+                    return;
+                }
+            }
+
+            const step = e.shiftKey ? 5 : 1;
+            let handled = false;
+
+            if (e.key === 'ArrowUp') {
+                nudgeActiveCell(0, -step);
+                handled = true;
+            } else if (e.key === 'ArrowDown') {
+                nudgeActiveCell(0, step);
+                handled = true;
+            } else if (e.key === 'ArrowLeft') {
+                nudgeActiveCell(-step, 0);
+                handled = true;
+            } else if (e.key === 'ArrowRight') {
+                nudgeActiveCell(step, 0);
+                handled = true;
+            } else if (e.key === 'Escape') {
+                deselectCell();
+                handled = true;
+            }
+
+            if (handled) {
+                e.preventDefault();
+            }
+        });
+
+        // 避免拖曳預設行為
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             dropZone.addEventListener(eventName, preventDefaults, false);
         });
@@ -887,23 +998,25 @@
 
                     const gridItem = document.createElement('div');
                     gridItem.className = 'grid-item';
+                    gridItem.dataset.row = r;
+                    gridItem.dataset.col = c;
+                    
                     const hasCellOffset = (cellOffsetX !== 0 || cellOffsetY !== 0);
                     if (hasCellOffset) {
                         gridItem.classList.add('has-offset');
                     }
 
-                    // 格子標籤與微調按鈕
+                    if (selectedCell && selectedCell.r === r && selectedCell.c === c) {
+                        gridItem.classList.add('is-selected');
+                    }
+
+                    // 格子標籤
                     const badge = document.createElement('div');
                     badge.className = 'cell-badge';
                     badge.textContent = fileName;
                     gridItem.appendChild(badge);
 
-                    const adjustBtn = document.createElement('button');
-                    adjustBtn.className = 'cell-adjust-btn';
-                    adjustBtn.innerHTML = '⚙';
-                    adjustBtn.title = '點擊微調此格';
-                    gridItem.appendChild(adjustBtn);
-
+                    // 若有偏移，標註數值
                     if (hasCellOffset) {
                         const offsetTag = document.createElement('div');
                         offsetTag.className = 'offset-tag';
@@ -911,9 +1024,9 @@
                         gridItem.appendChild(offsetTag);
                     }
 
-                    // 點擊格子或按鈕開啟單格微調
+                    // 點擊格子即選取並開啟即時微調
                     gridItem.addEventListener('click', () => {
-                        openCellModal(r, c, fileName);
+                        selectCell(r, c, fileName);
                     });
 
                     gridItem.appendChild(canvas);
