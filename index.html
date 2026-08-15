@@ -350,17 +350,15 @@
             font-weight: 600;
         }
 
-        /* 浮動微調卡 (Floating Popover - 不擋住視線) */
+        /* 浮動微調卡 (常駐顯示，直覺引導) */
         .floating-editor-card {
-            display: none;
             margin-top: 15px;
             background: rgba(30, 41, 59, 0.95);
             backdrop-filter: blur(16px);
-            border: 1px solid var(--highlight);
+            border: 1px solid rgba(56, 189, 248, 0.5);
             border-radius: 16px;
             padding: 16px 20px;
-            box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.6), 0 0 15px rgba(56, 189, 248, 0.2);
-            animation: fadeIn 0.25s ease-out;
+            box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.6), 0 0 15px rgba(56, 189, 248, 0.15);
         }
 
         .floating-editor-header {
@@ -643,7 +641,7 @@
                 <div class="preview-header">
                     <div>
                         <h3>即時預覽切割結果</h3>
-                        <p style="margin: 3px 0 0 0; font-size: 0.8rem; color: var(--text-muted);">💡 點選任一格子，即可直接以鍵盤方向鍵或下方微調器即時移動</p>
+                        <p style="margin: 3px 0 0 0; font-size: 0.8rem; color: var(--text-muted);">💡 點選任一格子，即可使用下方控制器或鍵盤方向鍵微調該格</p>
                     </div>
                     <div class="preview-header-actions">
                         <button id="download-btn">
@@ -661,13 +659,12 @@
                     <!-- Canvases will be injected here -->
                 </div>
 
-                <!-- 單格即時微調浮動卡 (非阻塞視線) -->
+                <!-- 單格即時微調控制面板 (常駐呈現) -->
                 <div class="floating-editor-card" id="floating-editor">
                     <div class="floating-editor-header">
-                        <h4 id="editor-title">🎯 正微調：01.png (第 1 列 第 1 欄)</h4>
-                        <div style="display: flex; gap: 8px;">
+                        <h4 id="editor-title">🎯 單格微調：01.png (第 1 列 第 1 欄)</h4>
+                        <div>
                             <button id="editor-reset-btn" style="background: rgba(255,255,255,0.1); color: #cbd5e1; box-shadow: none; padding: 4px 12px; font-size: 0.8rem;">重置此格</button>
-                            <button id="editor-close-btn" style="background: transparent; color: var(--text-muted); box-shadow: none; padding: 4px 8px; font-size: 1.1rem; line-height: 1;">&times;</button>
                         </div>
                     </div>
                     <div class="floating-editor-body">
@@ -688,11 +685,11 @@
                             <!-- 數值手動輸入 -->
                             <div class="input-fields-group">
                                 <div class="field-item">
-                                    <label>X (左右)</label>
+                                    <label>X 偏移</label>
                                     <input type="number" id="cell-offset-x" value="0" step="1">
                                 </div>
                                 <div class="field-item">
-                                    <label>Y (上下)</label>
+                                    <label>Y 偏移</label>
                                     <input type="number" id="cell-offset-y" value="0" step="1">
                                 </div>
                             </div>
@@ -700,12 +697,12 @@
 
                         <!-- 鍵盤快捷提示 -->
                         <div class="keyboard-hint">
-                            <span>⌨️ 快捷鍵：</span>
+                            <span>⌨️ 快捷操作：</span>
                             <span class="kbd-badge">↑</span>
                             <span class="kbd-badge">↓</span>
                             <span class="kbd-badge">←</span>
                             <span class="kbd-badge">→</span>
-                            <span style="font-size: 0.75rem;">直接微調 1px (按住 Shift 為 5px)</span>
+                            <span style="font-size: 0.75rem;">微調 1px (Shift 為 5px)</span>
                         </div>
                     </div>
                 </div>
@@ -739,10 +736,9 @@
         const removeBgInput = document.getElementById('remove-bg');
         const bgToleranceInput = document.getElementById('bg-tolerance');
 
-        // 浮動微調卡元素
+        // 單格微調面板元素
         const floatingEditor = document.getElementById('floating-editor');
         const editorTitle = document.getElementById('editor-title');
-        const editorCloseBtn = document.getElementById('editor-close-btn');
         const editorResetBtn = document.getElementById('editor-reset-btn');
         const cellOffsetXInput = document.getElementById('cell-offset-x');
         const cellOffsetYInput = document.getElementById('cell-offset-y');
@@ -752,7 +748,7 @@
         const dpadRight = document.getElementById('dpad-right');
         const dpadCenter = document.getElementById('dpad-center');
 
-        let selectedCell = null; // { r, c, fileName }
+        let selectedCell = { r: 0, c: 0, fileName: '01.png' }; // 預設選取第 1 格
 
         // 各列獨立 X/Y 位移參數
         const rowOffsetsInput = [
@@ -798,7 +794,7 @@
                 }
             }
 
-            deselectCell();
+            selectCell(0, 0, '01.png');
             if (currentImg) processImage();
         });
 
@@ -817,19 +813,11 @@
         // 選中某一格進行微調
         function selectCell(r, c, fileName) {
             selectedCell = { r, c, fileName };
-            editorTitle.textContent = `🎯 正微調：${fileName} (第 ${r + 1} 列 第 ${c + 1} 欄)`;
+            editorTitle.textContent = `🎯 單格微調：${fileName} (第 ${r + 1} 列 第 ${c + 1} 欄)`;
             cellOffsetXInput.value = cellOffsets[r][c].x;
             cellOffsetYInput.value = cellOffsets[r][c].y;
-            floatingEditor.style.display = 'block';
             
             // 更新畫面上高亮格子
-            updateCellHighlight();
-        }
-
-        // 取消選取
-        function deselectCell() {
-            selectedCell = null;
-            floatingEditor.style.display = 'none';
             updateCellHighlight();
         }
 
@@ -845,8 +833,6 @@
                 }
             });
         }
-
-        editorCloseBtn.addEventListener('click', deselectCell);
 
         // 微調數值變更輔助函式
         function nudgeActiveCell(dx, dy) {
@@ -869,9 +855,7 @@
             if (!selectedCell) return;
             const r = selectedCell.r;
             const c = selectedCell.c;
-            cellOffsets[r][c].x = { x: 0, y: 0 };
-            cellOffsets[r][c].x = 0;
-            cellOffsets[r][c].y = 0;
+            cellOffsets[r][c] = { x: 0, y: 0 };
             cellOffsetXInput.value = 0;
             cellOffsetYInput.value = 0;
             if (currentImg) processImage();
@@ -901,7 +885,7 @@
 
         // 全域鍵盤方向鍵監聽（選中格子時，按方向鍵直接微調）
         window.addEventListener('keydown', (e) => {
-            if (!selectedCell) return;
+            if (!selectedCell || !currentImg) return;
 
             // 若使用者正在輸入其他 input 框，不攔截
             if (['input', 'textarea'].includes(document.activeElement.tagName.toLowerCase())) {
@@ -924,9 +908,6 @@
                 handled = true;
             } else if (e.key === 'ArrowRight') {
                 nudgeActiveCell(step, 0);
-                handled = true;
-            } else if (e.key === 'Escape') {
-                deselectCell();
                 handled = true;
             }
 
@@ -979,6 +960,11 @@
                     currentImg = img;
                     controlsSection.style.display = 'block';
                     previewWrapper.style.display = 'flex';
+                    
+                    // 取得初始編號更新標籤並預設選取第 1 格
+                    const startIdx = parseInt(startIndexInput.value) || 1;
+                    selectCell(0, 0, `${String(startIdx).padStart(2, '0')}.png`);
+                    
                     processImage();
                 }
                 img.src = event.target.result;
@@ -1049,6 +1035,7 @@
 
                     if (selectedCell && selectedCell.r === r && selectedCell.c === c) {
                         gridItem.classList.add('is-selected');
+                        editorTitle.textContent = `🎯 單格微調：${fileName} (第 ${r + 1} 列 第 ${c + 1} 欄)`;
                     }
 
                     // 格子標籤
@@ -1065,7 +1052,7 @@
                         gridItem.appendChild(offsetTag);
                     }
 
-                    // 點擊格子即選取並開啟即時微調
+                    // 點擊格子即選取並切換微調控制台
                     gridItem.addEventListener('click', () => {
                         selectCell(r, c, fileName);
                     });
