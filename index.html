@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>圖片 4x4 切割工具</title>
+    <title>LINE 貼圖 4x4 圖片切割神器 v2.0 - 一鍵微調與打包工具</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
         :root {
@@ -17,6 +17,8 @@
             --text-muted: #94a3b8;
             --accent: #ec4899;
             --highlight: #38bdf8;
+            --badge-bg: rgba(59, 130, 246, 0.2);
+            --badge-border: rgba(59, 130, 246, 0.4);
         }
 
         body {
@@ -71,19 +73,40 @@
             position: relative;
         }
 
+        .header-title-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 6px;
+            flex-wrap: wrap;
+        }
+
         h1 {
-            margin-top: 0;
-            font-size: 2.2rem;
+            margin: 0;
+            font-size: 2.1rem;
             background: linear-gradient(135deg, #60a5fa, #c084fc);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 5px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .version-badge {
+            background: var(--badge-bg);
+            border: 1px solid var(--badge-border);
+            color: #60a5fa;
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 9999px;
+            letter-spacing: 0.5px;
         }
 
         p.subtitle {
             color: var(--text-muted);
-            margin-bottom: 25px;
-            font-size: 0.95rem;
+            margin: 0 0 25px 0;
+            font-size: 0.92rem;
+            line-height: 1.5;
         }
 
         .drop-zone {
@@ -484,6 +507,15 @@
             margin-right: 8px;
         }
 
+        .footer-note {
+            margin-top: 25px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-align: center;
+            border-top: 1px solid var(--glass-border);
+            padding-top: 15px;
+        }
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -514,8 +546,11 @@
 
         <!-- 左側：上傳與控制面板 -->
         <div class="left-panel">
-            <h1>圖片 4x4 切割工具</h1>
-            <p class="subtitle">放入貼圖，一鍵微調與打包（支援單列與單格即時微調）</p>
+            <div class="header-title-row">
+                <h1>LINE 貼圖 4x4 切割神器</h1>
+                <span class="version-badge">v2.0</span>
+            </div>
+            <p class="subtitle">放入 16 格集合圖，支援整體留白、單列對齊、單格獨立微調與一鍵打包 (ZIP)</p>
 
             <div class="drop-zone" id="drop-zone">
                 <input type="file" id="file-input" accept="image/*">
@@ -594,6 +629,10 @@
                         <label style="color: var(--text-muted); font-size: 0.85rem;" title="數值越大，淺色也會被當成白色去除">去背容差值 (0-255)</label>
                         <input type="number" id="bg-tolerance" value="10" min="0" max="255" step="1" style="width: 80px;">
                     </div>
+                </div>
+
+                <div class="footer-note">
+                    🔒 100% 純前端瀏覽器運算 ‧ 圖片絕不上傳任何伺服器 ‧ 支援 LINE 貼圖規範
                 </div>
             </div>
         </div>
@@ -830,7 +869,9 @@
             if (!selectedCell) return;
             const r = selectedCell.r;
             const c = selectedCell.c;
-            cellOffsets[r][c] = { x: 0, y: 0 };
+            cellOffsets[r][c].x = { x: 0, y: 0 };
+            cellOffsets[r][c].x = 0;
+            cellOffsets[r][c].y = 0;
             cellOffsetXInput.value = 0;
             cellOffsetYInput.value = 0;
             if (currentImg) processImage();
