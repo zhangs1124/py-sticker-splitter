@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-TW">
 
 <head>
@@ -15,6 +15,7 @@
             --primary-hover: #2563eb;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
+            --accent: #ec4899;
         }
 
         body {
@@ -235,6 +236,12 @@
             font-size: 1.2rem;
         }
 
+        .preview-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
         .grid-container {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -253,18 +260,86 @@
             align-items: center;
             justify-content: center;
             border: 1px solid var(--glass-border);
-            transition: transform 0.2s ease;
+            transition: all 0.2s ease;
+            position: relative;
+            cursor: pointer;
         }
         
         .grid-item:hover {
             transform: scale(1.02);
             border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .grid-item.has-offset {
+            border-color: var(--accent);
+            box-shadow: 0 0 8px rgba(236, 72, 153, 0.4);
         }
 
         .grid-item canvas {
             width: 100%;
             height: auto;
             display: block;
+        }
+
+        /* 單格右上角微調小標籤與按鈕 */
+        .cell-badge {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(4px);
+            font-size: 0.68rem;
+            color: #cbd5e1;
+            padding: 1px 5px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            pointer-events: none;
+        }
+
+        .cell-adjust-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid var(--glass-border);
+            color: #94a3b8;
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            padding: 0;
+            box-shadow: none;
+            transition: all 0.2s ease;
+        }
+
+        .cell-adjust-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            transform: scale(1.1);
+        }
+
+        .grid-item.has-offset .cell-adjust-btn {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .offset-tag {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            background: rgba(236, 72, 153, 0.85);
+            color: white;
+            font-size: 0.65rem;
+            padding: 1px 4px;
+            border-radius: 4px;
+            pointer-events: none;
+            font-weight: 500;
         }
 
         button {
@@ -307,6 +382,102 @@
             margin-right: 8px;
         }
 
+        /* 單格微調 Modal 彈窗 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .modal-card {
+            background: #1e293b;
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 24px;
+            width: 90%;
+            max-width: 380px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 10px;
+        }
+
+        .modal-header h4 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: var(--text-main);
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0 4px;
+            box-shadow: none;
+        }
+
+        .modal-close:hover {
+            color: white;
+            background: transparent;
+            transform: none;
+        }
+
+        .modal-body {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .modal-input-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-input-row label {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            gap: 10px;
+        }
+
+        .modal-btn-reset {
+            background: rgba(255, 255, 255, 0.08);
+            color: #cbd5e1;
+            box-shadow: none;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+
+        .modal-btn-done {
+            padding: 8px 20px;
+            font-size: 0.9rem;
+        }
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -338,7 +509,7 @@
         <!-- 左側：上傳與控制面板 -->
         <div class="left-panel">
             <h1>圖片 4x4 切割工具</h1>
-            <p class="subtitle">放入貼圖，一鍵微調與打包</p>
+            <p class="subtitle">放入貼圖，一鍵微調與打包（支援單列與單格獨立微調）</p>
 
             <div class="drop-zone" id="drop-zone">
                 <input type="file" id="file-input" accept="image/*">
@@ -425,14 +596,19 @@
         <div class="right-panel">
             <div id="preview-container-wrapper">
                 <div class="preview-header">
-                    <h3>即時預覽切割結果</h3>
-                    <button id="download-btn">
-                        <div class="loader" id="loader"></div>
-                        <span id="btn-text">打包下載 (ZIP)</span>
-                    </button>
-                    <button id="reset-settings" style="background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.1); box-shadow: none; margin-left: 10px;">
-                        重置設定
-                    </button>
+                    <div>
+                        <h3>即時預覽切割結果</h3>
+                        <p style="margin: 3px 0 0 0; font-size: 0.8rem; color: var(--text-muted);">💡 點擊任一格子可針對「單格」獨立微調 X/Y 軸</p>
+                    </div>
+                    <div class="preview-header-actions">
+                        <button id="download-btn">
+                            <div class="loader" id="loader"></div>
+                            <span id="btn-text">打包下載 (ZIP)</span>
+                        </button>
+                        <button id="reset-settings" style="background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.1); box-shadow: none;">
+                            重置全部
+                        </button>
+                    </div>
                 </div>
                 <div class="grid-container" id="grid-container">
                     <!-- Canvases will be injected here -->
@@ -440,6 +616,33 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- 單格微調 Modal 彈窗 -->
+    <div class="modal-overlay" id="cell-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h4 id="modal-title">微調單格</h4>
+                <button class="modal-close" id="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-input-row">
+                    <label for="cell-offset-x">X 軸偏移 (左右 px)</label>
+                    <input type="number" id="cell-offset-x" value="0" step="1">
+                </div>
+                <div class="modal-input-row">
+                    <label for="cell-offset-y">Y 軸偏移 (上下 px)</label>
+                    <input type="number" id="cell-offset-y" value="0" step="1">
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">
+                    說明：此數值會與「整體留白」及「該列偏移」疊加計算，並實際套用於切割與下載的圖檔。
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn-reset" id="cell-reset-btn">重置此格</button>
+                <button class="modal-btn-done" id="cell-save-btn">完成</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -466,6 +669,17 @@
         const removeBgInput = document.getElementById('remove-bg');
         const bgToleranceInput = document.getElementById('bg-tolerance');
 
+        // 單格微調 Modal 元素
+        const cellModal = document.getElementById('cell-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+        const cellOffsetXInput = document.getElementById('cell-offset-x');
+        const cellOffsetYInput = document.getElementById('cell-offset-y');
+        const cellResetBtn = document.getElementById('cell-reset-btn');
+        const cellSaveBtn = document.getElementById('cell-save-btn');
+
+        let activeCell = { r: 0, c: 0 };
+
         // 各列獨立 X/Y 位移參數
         const rowOffsetsInput = [
             { x: document.getElementById('row-1-offset-x'), y: document.getElementById('row-1-offset-y') },
@@ -474,6 +688,13 @@
             { x: document.getElementById('row-4-offset-x'), y: document.getElementById('row-4-offset-y') }
         ];
 
+        // 4x4 各格獨立 X/Y 偏移量矩陣
+        const rows = 4;
+        const cols = 4;
+        let cellOffsets = Array.from({ length: rows }, () => 
+            Array.from({ length: cols }, () => ({ x: 0, y: 0 }))
+        );
+
         let allInputs = [padTopInput, padBottomInput, padLeftInput, padRightInput, startIndexInput, removeBgInput, bgToleranceInput];
         rowOffsetsInput.forEach(r => {
             allInputs.push(r.x, r.y);
@@ -481,7 +702,7 @@
 
         // 重置按鈕邏輯
         document.getElementById('reset-settings').addEventListener('click', () => {
-            if (!confirm('確定要將所有設定恢復為預設值嗎？')) return;
+            if (!confirm('確定要將所有設定（包含每列與單格微調）恢復為預設值嗎？')) return;
             
             padTopInput.value = 0;
             padBottomInput.value = 0;
@@ -495,14 +716,19 @@
                 r.x.value = 0;
                 r.y.value = 0;
             });
+
+            // 重置所有單格偏移
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    cellOffsets[r][c] = { x: 0, y: 0 };
+                }
+            }
             
             if (currentImg) processImage();
         });
 
         let splitDataUrls = [];
         let currentImg = null;
-        const rows = 4;
-        const cols = 4;
 
         // 監聽所有參數變更
         allInputs.forEach(input => {
@@ -511,6 +737,50 @@
                     processImage();
                 }
             });
+        });
+
+        // Modal 相關事件
+        function openCellModal(r, c, fileName) {
+            activeCell = { r, c };
+            modalTitle.textContent = `微調單格：${fileName} (第 ${r + 1} 列 第 ${c + 1} 欄)`;
+            cellOffsetXInput.value = cellOffsets[r][c].x;
+            cellOffsetYInput.value = cellOffsets[r][c].y;
+            cellModal.style.display = 'flex';
+            cellOffsetXInput.focus();
+            cellOffsetXInput.select();
+        }
+
+        function closeCellModal() {
+            cellModal.style.display = 'none';
+        }
+
+        modalCloseBtn.addEventListener('click', closeCellModal);
+        cellSaveBtn.addEventListener('click', () => {
+            closeCellModal();
+        });
+
+        cellModal.addEventListener('click', (e) => {
+            if (e.target === cellModal) closeCellModal();
+        });
+
+        // 監聽 Modal 輸入框變更
+        [cellOffsetXInput, cellOffsetYInput].forEach(input => {
+            input.addEventListener('input', () => {
+                const r = activeCell.r;
+                const c = activeCell.c;
+                cellOffsets[r][c].x = parseInt(cellOffsetXInput.value) || 0;
+                cellOffsets[r][c].y = parseInt(cellOffsetYInput.value) || 0;
+                if (currentImg) processImage();
+            });
+        });
+
+        cellResetBtn.addEventListener('click', () => {
+            const r = activeCell.r;
+            const c = activeCell.c;
+            cellOffsets[r][c] = { x: 0, y: 0 };
+            cellOffsetXInput.value = 0;
+            cellOffsetYInput.value = 0;
+            if (currentImg) processImage();
         });
 
         // 避免預設行為
@@ -564,7 +834,7 @@
             reader.readAsDataURL(file);
         }
 
-        // 執行切割
+        // 執行切割（核心計算套用：外框留白 + 單列位移 + 單格獨立位移）
         function processImage() {
             if (!currentImg) return;
 
@@ -589,8 +859,8 @@
 
             for (let r = 0; r < rows; r++) {
                 // 取得該列獨立的 X 和 Y 偏移量
-                const offsetX = parseInt(rowOffsetsInput[r].x.value) || 0;
-                const offsetY = parseInt(rowOffsetsInput[r].y.value) || 0;
+                const rowOffsetX = parseInt(rowOffsetsInput[r].x.value) || 0;
+                const rowOffsetY = parseInt(rowOffsetsInput[r].y.value) || 0;
 
                 for (let c = 0; c < cols; c++) {
                     const canvas = document.createElement('canvas');
@@ -598,10 +868,13 @@
                     canvas.height = tileH;
                     const ctx = canvas.getContext('2d');
 
-                    // X 軸座標: 全局左留白 + 第 c 行的寬度 + 該列獨立的 X 偏移
-                    const left = padLeft + (c * tileW) + offsetX;
-                    // Y 軸座標: 全局上留白 + 第 r 行的高度 + 該列獨立的 Y 偏移
-                    const upper = padTop + (r * tileH) + offsetY;
+                    // 取得該格專屬的 X/Y 偏移量
+                    const cellOffsetX = cellOffsets[r][c].x || 0;
+                    const cellOffsetY = cellOffsets[r][c].y || 0;
+
+                    // 實際切割座標計算：全域留白 + 網格基準 + 該列偏移 + 該格獨立偏移
+                    const left = padLeft + (c * tileW) + rowOffsetX + cellOffsetX;
+                    const upper = padTop + (r * tileH) + rowOffsetY + cellOffsetY;
 
                     ctx.drawImage(currentImg, left, upper, tileW, tileH, 0, 0, tileW, tileH);
 
@@ -610,14 +883,45 @@
                         removeWhiteBackground(canvas, parseInt(bgToleranceInput.value) || 0);
                     }
 
+                    const fileName = `${String(currentIndex).padStart(2, '0')}.png`;
+
                     const gridItem = document.createElement('div');
                     gridItem.className = 'grid-item';
+                    const hasCellOffset = (cellOffsetX !== 0 || cellOffsetY !== 0);
+                    if (hasCellOffset) {
+                        gridItem.classList.add('has-offset');
+                    }
+
+                    // 格子標籤與微調按鈕
+                    const badge = document.createElement('div');
+                    badge.className = 'cell-badge';
+                    badge.textContent = fileName;
+                    gridItem.appendChild(badge);
+
+                    const adjustBtn = document.createElement('button');
+                    adjustBtn.className = 'cell-adjust-btn';
+                    adjustBtn.innerHTML = '⚙';
+                    adjustBtn.title = '點擊微調此格';
+                    gridItem.appendChild(adjustBtn);
+
+                    if (hasCellOffset) {
+                        const offsetTag = document.createElement('div');
+                        offsetTag.className = 'offset-tag';
+                        offsetTag.textContent = `${cellOffsetX > 0 ? '+' : ''}${cellOffsetX}, ${cellOffsetY > 0 ? '+' : ''}${cellOffsetY}`;
+                        gridItem.appendChild(offsetTag);
+                    }
+
+                    // 點擊格子或按鈕開啟單格微調
+                    gridItem.addEventListener('click', () => {
+                        openCellModal(r, c, fileName);
+                    });
+
                     gridItem.appendChild(canvas);
                     gridContainer.appendChild(gridItem);
 
-                    const fileName = `${String(currentIndex).padStart(2, '0')}.png`;
                     currentIndex++;
 
+                    // 收集要輸出的圖檔資料（套用實際切割與尺寸轉換）
                     splitDataUrls.push({
                         name: fileName,
                         data: enforceLineStickerSize(canvas)
